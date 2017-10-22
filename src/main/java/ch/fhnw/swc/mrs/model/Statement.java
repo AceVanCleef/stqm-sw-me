@@ -16,7 +16,7 @@ public abstract class Statement {
      */
     public Statement(String name, String firstName, List<Rental> rentals) {
         if (name.length() > 8 || firstName.length() > 8 || rentals == null) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("first or last name too long or rentals euqals null");
         }
         this.firstName = firstName;
         this.lastName = name;

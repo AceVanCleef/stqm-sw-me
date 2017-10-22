@@ -10,6 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 /** Lesson learned:
+ *
+ *  [Inheritance Integration Test]
  *  One integration test strategy is to use a subclass in order to
  *  test the behavior of an abstract parent class.
  */

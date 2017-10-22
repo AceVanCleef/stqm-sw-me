@@ -3,10 +3,7 @@ package ch.fhnw.swc.mrs.data;
 import java.sql.Connection;
 import java.util.List;
 
-import ch.fhnw.swc.mrs.model.MRSServices;
-import ch.fhnw.swc.mrs.model.Movie;
-import ch.fhnw.swc.mrs.model.Rental;
-import ch.fhnw.swc.mrs.model.User;
+import ch.fhnw.swc.mrs.model.*;
 
 public class DbMRSServices implements MRSServices {
     private static final String DB_CONNECTION = "jdbc:hsqldb:mem:mrs";
@@ -131,6 +128,10 @@ public class DbMRSServices implements MRSServices {
 	public boolean createRental(User u, Movie m) {
 	    Rental r = new Rental(u, m);
 	    try {
+            //Worksheet le03: Integration tests
+            Bill b = new Bill(u.getFirstName(), u.getName(), u.getRentals());
+            System.out.println(b.print());
+
 	        getRentalDAO().save(r);
 	        m.setRented(true);
 	        getMovieDAO().saveOrUpdate(m);
