@@ -35,12 +35,17 @@ import ch.fhnw.swc.mrs.model.PriceCategory;
 import ch.fhnw.swc.mrs.model.User;
 
 
+/** WS_DB-Testing.pdf - Tasks 2: Write your own integration test for MovieDao
+ *  a) What do the individual test methods test?
+ *  b) Do you have any questions? Raise them to the lecturer.
+ */
+
 public class ITUserDao extends DBTestCase {
 
 	/** Class under test: UserDAO. */
 	private UserDAO dao;
-    private IDatabaseTester tester;
-    private Connection connection;
+    private IDatabaseTester tester;     //IDatabaseTester, a DBunit object. Manages DB testing using .xml files.
+    private Connection connection;      //package java.sql; --> connection to DB.
 
     private static final String COUNT_SQL = "SELECT COUNT(*) FROM clients";
     private static final String DB_CONNECTION = "jdbc:hsqldb:mem:mrs";
@@ -91,6 +96,12 @@ public class ITUserDao extends DBTestCase {
 		tester.onTearDown();
 	}
 
+	/*
+	    a) What does this test method do?
+	    1. count no. of rows before a DB entry gets deleted. Are there really 3 entries?
+	    2. Tries to delete non-existing entry. Does any error occur?
+	    3. ??? -> b) raised and solved. See comment below on line 121.
+	 */
     public void testDeleteNonexisting() throws Exception {
         // count no. of rows before deletion
         Statement s = connection.createStatement();
@@ -107,10 +118,26 @@ public class ITUserDao extends DBTestCase {
         r = s.executeQuery(COUNT_SQL);
         r.next();
         rows = r.getInt(1);
-        assertEquals(2, rows);
+        assertEquals(2, rows);          // b) Why 2 and not 3? Shouldn't DB be free of changes?
+                                                /*
+                                                    Antwort (siehe UserDaoTestData.xml):
+                                                    <clients id="42"
+                                                    firstname="Micky"
+                                                    name="Mouse"
+                                                    birthdate="1935-11-03"/>
+
+                                                    Mit user.setId(42) wird der name "Micky" vs. "Christian"
+                                                    umgangen.
+                                                 */
     }
     
-    
+    /*
+        a) What does this test method do?
+        1. Check how many entries are at the beginning. 3 entries expected.
+        2. Entry deleted according to ID. Two more entries left.
+        3. Gets DBunit xml with expected DB status.
+        4. compares current DB status to expected one.
+     */
     public void testDelete() throws Exception {
         // count no. of rows before deletion
         Statement s = connection.createStatement();
@@ -123,21 +150,37 @@ public class ITUserDao extends DBTestCase {
         User user = new User("Duck", "Donald", LocalDate.of(2013, 1, 13));
         user.setId(13);
         dao.delete(user);
+
+        /*
+            <clients id="13"
+            firstname="Donald"
+            name="Duck"
+            birthdate="2013-01-13"/>
+
+            ...wird gelöscht
+         */
         
         // Fetch database data after deletion
         IDataSet databaseDataSet = tester.getConnection().createDataSet();
         ITable actualTable = databaseDataSet.getTable("CLIENTS");
 
-        InputStream stream = this.getClass().getResourceAsStream("UserDaoTestResult.xml");
+        InputStream stream = this.getClass().getResourceAsStream("UserDaoTestResult.xml");  //gets expected DB status.
         IDataSet expectedDataSet = new FlatXmlDataSetBuilder().build(stream);
         ITable expectedTable = expectedDataSet.getTable("CLIENTS");
 
         Assertion.assertEquals(expectedTable, actualTable);
     }
 
+    /*
+        a) What does this test method so.
+        1. gets a list of all users stored in the UserDAO
+        2. gets expected result from DBunit .xml file.
+        3. compares expected with current result set.
+        In short: Does the DAO deliver the same entries as it is stored in the DB?
+     */
     public void testGetAll() throws DatabaseUnitException, SQLException, Exception {
         List<User> userlist = dao.getAll();
-        ITable actualTable = convertToTable(userlist);
+        ITable actualTable = convertToTable(userlist);      //ITable, a DBunit object. Probably storing comparable DB entries/values.
 
         InputStream stream = this.getClass().getResourceAsStream("UserDaoTestData.xml");
         IDataSet expectedDataSet = new FlatXmlDataSetBuilder().build(stream);
@@ -145,17 +188,30 @@ public class ITUserDao extends DBTestCase {
 
         Assertion.assertEquals(expectedTable, actualTable);
     }
-    
+
+    /*
+        a) What does this test method do?
+        Note: Single Row test means, there's only one entry in the DB (User table.to be precise).
+        1. get expected result from DBunit .xml file.
+        2. get all DB entries via UserDao. (Note: DAO execute SQL queries towards DB).
+        3. checks that only one result is returned by the query.
+        4. checks that the single entry is what is expected in UserDaoSingleRowTest.
+     */
     public void testGetAllSingleRow() throws Exception {
         InputStream stream = this.getClass().getResourceAsStream("UserDaoSingleRowTest.xml");
         IDataSet dataSet = new FlatXmlDataSetBuilder().build(stream);
-        DatabaseOperation.CLEAN_INSERT.execute(tester.getConnection(), dataSet);
+        DatabaseOperation.CLEAN_INSERT.execute(tester.getConnection(), dataSet); //executes CRUD operations (?)
 
         List<User> userlist = dao.getAll();
         assertEquals(1, userlist.size());
         assertEquals("Bond", userlist.get(0).getName());
     }
-    
+
+    /*
+        a) What does this test method do?
+        The DB is empty. It is expected that the UserDAO returns an empty result list.
+        This method checks whether this really is the case.
+     */
     public void testGetAllEmptyTable() throws Exception {
     	InputStream stream = this.getClass().getResourceAsStream("UserDaoEmpty.xml");
         IDataSet dataSet = new XmlDataSet(stream);
@@ -166,6 +222,10 @@ public class ITUserDao extends DBTestCase {
         assertEquals(0, userlist.size());
     }
 
+    /*
+        a) What does this test method do?
+        Checks wheter the UserDAO delivers the expected result by querying using the ID (or primary key).
+     */
     public void testGetById() throws SQLException {
         User user = dao.getById(42);
         assertEquals("Micky", user.getFirstName());
@@ -173,14 +233,24 @@ public class ITUserDao extends DBTestCase {
         assertEquals(42, user.getId());
     }
 
+    /*
+        a) What does this test method do?
+        There are two entries with last name "Duck" in the DBunit's .xml file.
+        This method checks whether the UserDAO delivers two entries.
+        ("Does the SQL prepared statement work? Does the .getByName() work?)
+     */
     public void testGetByName() throws SQLException {
         List<User> userlist = dao.getByName("Duck");
         assertEquals(2, userlist.size());
     }
 
+    /*
+        a) What does this test method do?
+        Checks whether dao.saveOrUpdate() follows the Update - behavior.
+     */
     public void testUpdate() throws SQLException {
         // count no. of rows before operation
-        Statement s = connection.createStatement();
+        Statement s = connection.createStatement(); //.createStatement() is a factory method.
         ResultSet r = s.executeQuery(COUNT_SQL);
         r.next();
         int rows0 = r.getInt(1);
@@ -196,7 +266,11 @@ public class ITUserDao extends DBTestCase {
         int rows1 = r.getInt(1);
         assertEquals(rows0, rows1);
     }
-    
+
+    /*
+        a) What does this test method do?
+        Checks whether dao.saveOrUpdate() follows the Save/Create - behavior.
+     */
     public void testSave() throws Exception {
         // count no. of rows before operation
         Statement s = connection.createStatement();
