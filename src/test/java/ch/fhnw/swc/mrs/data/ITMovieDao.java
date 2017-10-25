@@ -33,7 +33,7 @@ public class ITMovieDao extends DBTestCase {
     private IDatabaseTester tester;     //IDatabaseTester, a DBunit object. Manages DB testing using .xml files.
     private Connection connection;      //package java.sql; --> connection to DB.
 
-    private static final String COUNT_SQL = "SELECT COUNT(*) FROM clients";
+    private static final String COUNT_SQL = "SELECT COUNT(*) FROM movies";
     private static final String DB_CONNECTION = "jdbc:hsqldb:mem:mrs";
 
 	/** Create a new Integration Test object. */
@@ -124,17 +124,17 @@ public class ITMovieDao extends DBTestCase {
 
         // delete existing record
         Movie movie = new Movie("Star Wars", LocalDate.now(), RegularPriceCategory.getInstance(), 0);
-        movie.setId(1);     //delete first entry in DAO.
+        movie.setId(2);     //delete 2nd entry.
         dao.delete(movie);
 
         
         // Fetch database data after deletion
         IDataSet databaseDataSet = tester.getConnection().createDataSet();
-        ITable actualTable = databaseDataSet.getTable("CLIENTS");
+        ITable actualTable = databaseDataSet.getTable("MOVIES");
 
         InputStream stream = this.getClass().getResourceAsStream("MovieDaoTestResult.xml");  //gets expected DB status.
         IDataSet expectedDataSet = new FlatXmlDataSetBuilder().build(stream);
-        ITable expectedTable = expectedDataSet.getTable("CLIENTS");
+        ITable expectedTable = expectedDataSet.getTable("MOVIES");
 
         Assertion.assertEquals(expectedTable, actualTable);
     }
@@ -152,7 +152,7 @@ public class ITMovieDao extends DBTestCase {
 
         InputStream stream = this.getClass().getResourceAsStream("MovieDaoTestData.xml");
         IDataSet expectedDataSet = new FlatXmlDataSetBuilder().build(stream);
-        ITable expectedTable = expectedDataSet.getTable("CLIENTS");
+        ITable expectedTable = expectedDataSet.getTable("MOVIES");
 
         Assertion.assertEquals(expectedTable, actualTable);
     }
@@ -166,13 +166,13 @@ public class ITMovieDao extends DBTestCase {
         4. checks that the single entry is what is expected in UserDaoSingleRowTest.
      */
     public void testGetAllSingleRow() throws Exception {
-        InputStream stream = this.getClass().getResourceAsStream("MovieDaoSingleRowTest.xml");
+        InputStream stream = this.getClass().getResourceAsStream("MovieDaoSingleRow.xml");
         IDataSet dataSet = new FlatXmlDataSetBuilder().build(stream);
         DatabaseOperation.CLEAN_INSERT.execute(tester.getConnection(), dataSet); //executes CRUD operations (?)
 
         List<Movie> movieList = dao.getAll();
         assertEquals(1, movieList.size());
-        assertEquals("Titanic", movieList.get(0).getTitle());
+        assertEquals("Casablanca", movieList.get(0).getTitle());
     }
 
     /*
@@ -265,12 +265,13 @@ public class ITMovieDao extends DBTestCase {
 		for (Movie m : movielist) {
 			t.addRow();
 			LocalDate d = m.getReleaseDate();
-			t.setValue(row, "id", m.getId());               //wie in MovieDaoTestData.xml
-			t.setValue(row, "title", m.getTitle());
-            t.setValue(row, "isrented", m.isRented());
-            t.setValue(row, "releasedate", new Date(d.getYear()-1900, d.getMonthValue()-1, d.getDayOfMonth()));
-            t.setValue(row, "pricecategory", m.getPriceCategory().toString());
+			/*			Expected :[agerating, id, isrented, pricecategory, releasedate, title]			 */
             t.setValue(row, "agerating", m.getAgeRating());
+            t.setValue(row, "id", m.getId());               //wie in MovieDaoTestData.xml
+            t.setValue(row, "isrented", m.isRented());
+            t.setValue(row, "pricecategory", m.getPriceCategory().toString());
+            t.setValue(row, "releasedate", new Date(d.getYear()-1900, d.getMonthValue()-1, d.getDayOfMonth()));
+            t.setValue(row, "title", m.getTitle());
 			row++;
 		}
 		return t;
