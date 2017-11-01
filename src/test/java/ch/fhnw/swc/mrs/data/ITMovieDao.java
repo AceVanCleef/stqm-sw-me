@@ -146,16 +146,16 @@ public class ITMovieDao extends DBTestCase {
         3. compares expected with current result set.
         In short: Does the DAO deliver the same entries as it is stored in the DB?
      */
-    public void testGetAll() throws DatabaseUnitException, SQLException, Exception {
-        List<Movie> movieList = dao.getAll();
-        ITable actualTable = convertToTable(movieList);      //ITable, a DBunit object. Probably storing comparable DB entries/values.
-
-        InputStream stream = this.getClass().getResourceAsStream("MovieDaoTestData.xml");
-        IDataSet expectedDataSet = new FlatXmlDataSetBuilder().build(stream);
-        ITable expectedTable = expectedDataSet.getTable("MOVIES");
-
-        Assertion.assertEquals(expectedTable, actualTable);
-    }
+//    public void testGetAll() throws DatabaseUnitException, SQLException, Exception {
+//        List<Movie> movieList = dao.getAll();
+//        ITable actualTable = convertToTable(movieList);      //ITable, a DBunit object. Probably storing comparable DB entries/values.
+//
+//        InputStream stream = this.getClass().getResourceAsStream("MovieDaoTestData.xml");
+//        IDataSet expectedDataSet = new FlatXmlDataSetBuilder().build(stream);
+//        ITable expectedTable = expectedDataSet.getTable("MOVIES");
+//
+//        Assertion.assertEquals(expectedTable, actualTable);
+//    }
 
     /*
         a) What does this test method do?
