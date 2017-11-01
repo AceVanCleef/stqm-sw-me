@@ -129,7 +129,7 @@ public class DbMRSServices implements MRSServices {
 	    Rental r = new Rental(u, m);
 	    try {
             //Worksheet le03: Integration tests
-            Bill b = new Bill(u.getFirstName(), u.getName(), u.getRentals());
+            Bill b = new Bill(u.getName(), u.getFirstName(), u.getRentals());
             System.out.println(b.print());
 
 	        getRentalDAO().save(r);
