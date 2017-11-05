@@ -6,8 +6,8 @@ import java.util.List;
 import ch.fhnw.swc.mrs.model.*;
 
 public class DbMRSServices implements MRSServices {
-    private static final String DB_CONNECTION = "jdbc:hsqldb:mem:mrs";
-    //private static final String DB_CONNECTION = "jdbc:hsqldb:hsql://localhost/";
+    //private static final String DB_CONNECTION = "jdbc:hsqldb:mem:mrs";
+    private static final String DB_CONNECTION = "jdbc:hsqldb:hsql://localhost/";
 	private Database db;
 	
 	private MovieDAO getMovieDAO() { 
