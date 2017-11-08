@@ -12,6 +12,8 @@ pipeline {
 		stage('Compile & Test') {
 			steps {
 				echo 'running Maven build'
+				sh 'mvn'
+				junit 'reports/**/*.xml'
 			}
 			post {
 				success {
