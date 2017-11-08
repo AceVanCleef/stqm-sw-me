@@ -12,7 +12,7 @@ pipeline {
 		stage('Compile & Test') {
 			steps {
 				echo 'running Maven build'
-				sh 'mvn'
+				sh 'mvn test'
 				junit 'reports/**/*.xml'
 			}
 			post {
